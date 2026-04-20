@@ -139,6 +139,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      position: fixed;
+      bottom: clamp(60px, 10vh, 100px);
+      left: clamp(10px, 2vw, 40px);
       font-size: clamp(40px, 10vw, 120px);
       font-weight: bold;
       z-index: 8;
@@ -171,32 +174,35 @@
       bottom: clamp(10px, 2vh, 30px);
       left: clamp(10px, 2vw, 30px);
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: clamp(8px, 1.5vw, 15px);
+      gap: clamp(10px, 2vw, 25px);
       z-index: 8;
     }
 
     .history-container {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
-      gap: clamp(5px, 1vw, 12px);
+      gap: clamp(10px, 2vw, 20px);
       padding: clamp(5px, 1vw, 15px);
+      position: fixed;
+      bottom: clamp(120px, 20vh, 200px);
+      left: 50%;
+      transform: translateX(-50%);
       flex-wrap: wrap;
-      max-width: 300px;
+      max-width: 90%;
       z-index: 7;
     }
 
     .number-history {
-      width: clamp(30px, 5vw, 50px);
-      height: clamp(30px, 5vw, 50px);
+      width: clamp(50px, 8vw, 80px);
+      height: clamp(50px, 8vw, 80px);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: clamp(2px, 0.3vw, 5px);
-      font-size: clamp(10px, 2vw, 16px);
+      margin: clamp(3px, 0.5vw, 8px);
+      font-size: clamp(14px, 3vw, 24px);
       color: white;
       flex-shrink: 0;
     }
@@ -1031,21 +1037,21 @@
       <div class="payout-value">{{ payout_value }}</div>
   </div>
 
+  <div class="number-display">
+    <div class="inner-circle">
+      <div class="small-text">0</div>
+      <div>{{ number }}</div>
+    </div>
+  </div>
+  
   <div class="number-container">
-    <div class="number-display">
-      <div class="inner-circle">
-        <div class="small-text">0</div>
-        <div>{{ number }}</div>
+      <div class="history-container">
+          <div class="number-history" id="history-1">0</div>
+          <div class="number-history" id="history-2">0</div>
+          <div class="number-history" id="history-3">0</div>
+          <div class="number-history" id="history-4">0</div>
+          <div class="number-history" id="history-5">0</div>
       </div>
-    </div>
-    
-    <div class="history-container">
-        <div class="number-history" id="history-1">0</div>
-        <div class="number-history" id="history-2">0</div>
-        <div class="number-history" id="history-3">0</div>
-        <div class="number-history" id="history-4">0</div>
-        <div class="number-history" id="history-5">0</div>
-    </div>
   </div>
 
   <div class="button-container">
@@ -2028,7 +2034,7 @@ function monitorBonusState() {
 }
 
 // Event listeners
-document.getElementById('fetchButton').addEventListener('click', async () => {
+document.getElementById('fetchButton').addEventListener('dblclick', async () => {
     const cardId = parseInt(document.getElementById('cardIdInput').value, 10);
     if (cardId > 0 && cardId <= bingoCards.length) {
         await displayBingoCard(bingoCards[cardId - 1]);
