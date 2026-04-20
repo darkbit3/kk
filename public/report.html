@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arada Bingo - Report</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #8B4513, #654321);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 2px solid white;
+    border-radius: 5px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #8B4513;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content */
+main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+main h2 {
+    font-size: 32px;
+    color: #8B4513;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+    font-size: 16px;
+}
+
+/* Report Container */
+.report-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.report-box {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.report-box:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    border-color: #8B4513;
+    background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+}
+
+.report-box strong {
+    display: block;
+    font-size: 24px;
+    color: #8B4513;
+    margin-bottom: 8px;
+}
+
+.report-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Details Section */
+.details {
+    display: none;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-top: 15px;
+    border-left: 4px solid #8B4513;
+    animation: slideDown 0.3s ease;
+}
+
+.details.active {
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.details h3 {
+    color: #8B4513;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.details ul {
+    list-style: none;
+}
+
+.details li {
+    padding: 8px 12px;
+    background-color: white;
+    border-radius: 5px;
+    margin-bottom: 6px;
+    border-left: 3px solid #8B4513;
+    transition: all 0.2s ease;
+}
+
+.details li:hover {
+    background-color: #f0f0f0;
+    padding-left: 16px;
+}
+
+/* Bonus Management */
+.bonus-management {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 40px;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.bonus-management h2 {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.bonus-management > p {
+    color: #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.bonus-input-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.bonus-input-group input {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.bonus-input-group input:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.bonus-input-group button {
+    padding: 12px 24px;
+    background-color: #00a86b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.bonus-input-group button:hover {
+    background-color: #009960;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
+}
+
+.bonus-list-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.bonus-list-container h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.bonus-list-container ul {
+    list-style: none;
+}
+
+.bonus-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: white;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    border-left: 4px solid #00a86b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bonus-item-info {
+    flex-grow: 1;
+}
+
+.bonus-item-number {
+    font-weight: 700;
+    color: #333;
+    font-size: 16px;
+}
+
+.bonus-item-amount {
+    color: #00a86b;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.bonus-item-remove {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.bonus-item-remove:hover {
+    background-color: #ff5252;
+    transform: scale(1.05);
+}
+
+.bonus-save-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: white;
+    color: #667eea;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.bonus-save-btn:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bonus-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: center;
+    display: none;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease;
+}
+
+.bonus-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+}
+
+.bonus-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    main {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .bonus-input-group {
+        flex-direction: column;
+    }
+
+    .bonus-input-group input,
+    .bonus-input-group button {
+        width: 100%;
+    }
+}
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>📊 Arada Bingo - Report</h1>
+    <nav>
+        <a href="/">Game</a>
+        <a href="account.html">Account</a>
+    </nav>
+</header>
+
+<main>
+    <h2>Monthly Report & Analytics</h2>
+    <p class="subtitle">Track your game statistics and manage bonuses</p>
+
+    <div class="report-container">
+        <div class="report-box" onclick="toggleDetails('payoutDetails')">
+            <strong>💰 Total Payout</strong>
+            <div class="report-value">$2,000.00</div>
+            <div class="details" id="payoutDetails">
+                <h3>Payout Breakdown</h3>
+                <ul>
+                    <li><strong>Game Session A:</strong> $1,000.00</li>
+                    <li><strong>Game Session B:</strong> $700.00</li>
+                    <li><strong>Game Session C:</strong> $300.00</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="report-box" onclick="toggleDetails('balanceDetails')">
+            <strong>💵 Total Balance</strong>
+            <div class="report-value">$5,000.00</div>
+            <div class="details" id="balanceDetails">
+                <h3>Balance Details</h3>
+                <ul>
+                    <li><strong>Current Balance:</strong> $5,000.00</li>
+                    <li><strong>Pending Withdrawals:</strong> $0.00</li>
+                    <li><strong>Available Balance:</strong> $5,000.00</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="report-box" onclick="toggleDetails('statsDetails')">
+            <strong>📈 Game Statistics</strong>
+            <div class="report-value">47 Games</div>
+            <div class="details" id="statsDetails">
+                <h3>Game Stats</h3>
+                <ul>
+                    <li><strong>Total Games Played:</strong> 47</li>
+                    <li><strong>Win Rate:</strong> 68.09%</li>
+                    <li><strong>Average Win:</strong> $42.55</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bonus Management Section -->
+    <div class="bonus-management">
+        <h2>🎁 Bonus Management</h2>
+        <p>Add and manage bonus numbers with their amounts. These bonuses will be tracked during gameplay.</p>
+        
+        <div class="bonus-input-group">
+            <input type="number" id="bonusNumber" placeholder="Bonus Number (1-400)" min="1" max="400">
+            <input type="number" id="bonusAmount" placeholder="Bonus Amount ($)" min="0" step="0.01">
+            <button onclick="addBonus()">➕ Add Bonus</button>
+        </div>
+
+        <div class="bonus-list-container">
+            <h3>Active Bonuses</h3>
+            <ul id="bonusList"></ul>
+        </div>
+
+        <button class="bonus-save-btn" onclick="saveBonuses()">💾 Save All Bonuses</button>
+        <div class="bonus-message" id="bonusMessage"></div>
+    </div>
+
+</main>
+
+<script>
+let bonuses = [];
+
+function loadBonuses() {
+    const saved = localStorage.getItem('bingoBonuses');
+    if (saved) {
+        bonuses = JSON.parse(saved);
+        displayBonuses();
+    }
+}
+
+function addBonus() {
+    const number = parseInt(document.getElementById('bonusNumber').value);
+    const amount = parseFloat(document.getElementById('bonusAmount').value);
+
+    if (!number || isNaN(number) || number < 1 || number > 400) {
+        showMessage('❌ Please enter valid bonus number (1-400)', 'error');
+        return;
+    }
+
+    if (!amount || isNaN(amount) || amount < 0) {
+        showMessage('❌ Please enter valid bonus amount', 'error');
+        return;
+    }
+
+    if (bonuses.find(b => b.number === number)) {
+        showMessage('⚠️ This bonus number already exists', 'error');
+        return;
+    }
+
+    bonuses.push({ number, amount });
+    document.getElementById('bonusNumber').value = '';
+    document.getElementById('bonusAmount').value = '';
+    displayBonuses();
+    showMessage('✅ Bonus added successfully!', 'success');
+}
+
+function displayBonuses() {
+    const list = document.getElementById('bonusList');
+    list.innerHTML = '';
+    
+    if (bonuses.length === 0) {
+        const emptyMsg = document.createElement('li');
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.color = '#999';
+        emptyMsg.style.padding = '20px';
+        emptyMsg.textContent = 'No bonuses added yet';
+        list.appendChild(emptyMsg);
+        return;
+    }
+    
+    bonuses.forEach((bonus, index) => {
+        const item = document.createElement('li');
+        item.className = 'bonus-item';
+        item.innerHTML = `
+            <div class="bonus-item-info">
+                <div class="bonus-item-number">#${bonus.number}</div>
+                <div class="bonus-item-amount">$${bonus.amount.toFixed(2)}</div>
+            </div>
+            <button class="bonus-item-remove" onclick="removeBonus(${index})">🗑️ Remove</button>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function removeBonus(index) {
+    const removed = bonuses[index];
+    bonuses.splice(index, 1);
+    displayBonuses();
+    showMessage(`✅ Bonus #${removed.number} removed`, 'success');
+}
+
+function saveBonuses() {
+    if (bonuses.length === 0) {
+        showMessage('⚠️ No bonuses to save', 'error');
+        return;
+    }
+    
+    localStorage.setItem('bingoBonuses', JSON.stringify(bonuses));
+    showMessage(`✅ ${bonuses.length} bonus(es) saved successfully!`, 'success');
+}
+
+function showMessage(text, type) {
+    const msgEl = document.getElementById('bonusMessage');
+    msgEl.textContent = text;
+    msgEl.className = `bonus-message ${type}`;
+    setTimeout(() => {
+        msgEl.className = 'bonus-message';
+    }, 3000);
+}
+
+function toggleDetails(detailId) {
+    const detail = document.getElementById(detailId);
+    detail.classList.toggle('active');
+}
+
+window.addEventListener('DOMContentLoaded', loadBonuses);
+</script>
+
+</body>
+</html>

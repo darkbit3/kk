@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arada Bingo - Account</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #8B4513, #654321);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.header-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.percentage-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.percentage-control label {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.percentage-control button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.decrease-btn {
+    background-color: #d9534f;
+}
+
+.decrease-btn:hover {
+    background-color: #c9302c;
+    transform: scale(1.05);
+}
+
+.increase-btn {
+    background-color: #5cb85c;
+}
+
+.increase-btn:hover {
+    background-color: #47a447;
+    transform: scale(1.05);
+}
+
+.percentage-control input {
+    width: 70px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    text-align: center;
+    font-weight: 600;
+}
+
+.percentage-display {
+    display: flex;
+    gap: 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.percentage-display p {
+    margin: 0;
+}
+
+.payout, .balance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 2px solid white;
+    border-radius: 5px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+nav a:hover {
+    background-color: white;
+    color: #8B4513;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content */
+main {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+main h2 {
+    font-size: 32px;
+    color: #8B4513;
+    margin-bottom: 15px;
+    border-bottom: 3px solid #8B4513;
+    padding-bottom: 15px;
+}
+
+main p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* Account Cards */
+.account-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.account-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border-left: 5px solid #8B4513;
+}
+
+.account-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.account-card-label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.account-card-value {
+    font-size: 22px;
+    color: #333;
+    font-weight: 700;
+    word-break: break-all;
+}
+
+/* Account Details List */
+.account-details {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    margin-top: 40px;
+}
+
+.account-details h3 {
+    color: #8B4513;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.account-list {
+    list-style: none;
+}
+
+.account-list-item {
+    padding: 15px;
+    background: white;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    border-left: 4px solid #8B4513;
+}
+
+.account-list-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.item-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.item-value {
+    color: #8B4513;
+    font-weight: 700;
+}
+
+/* Settings Section */
+.settings-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 40px;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.settings-section h3 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.settings-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: white;
+    color: #667eea;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.settings-button:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.settings-button.danger {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.settings-button.danger:hover {
+    background-color: #ff5252;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-controls {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .percentage-control,
+    .percentage-display {
+        width: 100%;
+    }
+
+    nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    main {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .account-container {
+        grid-template-columns: 1fr;
+    }
+
+    main h2 {
+        font-size: 24px;
+    }
+
+    .settings-button {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>👤 Arada Bingo - Account</h1>
+    <div class="header-controls">
+        <div class="percentage-control">
+            <label for="percentageInput">Percentage %:</label>
+            <button class="decrease-btn" id="decreaseBtn">−</button>
+            <input type="number" id="percentageInput" value="20" min="0" max="100">
+            <button class="increase-btn" id="increaseBtn">+</button>
+        </div>
+        <div class="percentage-display">
+            <div class="payout">
+                <span>Payout:</span>
+                <span id="payoutPercentDisplay">80</span>%
+            </div>
+            <div class="balance">
+                <span>Balance:</span>
+                <span id="balancePercentDisplay">20</span>%
+            </div>
+        </div>
+    </div>
+    <nav>
+        <a href="/">Game</a>
+        <a href="report.html">Report</a>
+    </nav>
+</header>
+
+<main>
+    <h2>📋 User Account Information</h2>
+    <p>Manage your account settings and view your profile information</p>
+
+    <!-- Account Cards -->
+    <div class="account-container">
+        <div class="account-card">
+            <div class="account-card-label">Full Name</div>
+            <div class="account-card-value">John Doe</div>
+        </div>
+        <div class="account-card">
+            <div class="account-card-label">Email Address</div>
+            <div class="account-card-value">john.doe@example.com</div>
+        </div>
+        <div class="account-card">
+            <div class="account-card-label">Account Status</div>
+            <div class="account-card-value" style="color: #00a86b;">✓ Active</div>
+        </div>
+    </div>
+
+    <!-- Account Details -->
+    <div class="account-details">
+        <h3>Account Details</h3>
+        <ul class="account-list">
+            <li class="account-list-item">
+                <span class="item-label">Account Created:</span>
+                <span class="item-value">January 1, 2023</span>
+            </li>
+            <li class="account-list-item">
+                <span class="item-label">Last Login:</span>
+                <span class="item-value">Today, 2:30 PM</span>
+            </li>
+            <li class="account-list-item">
+                <span class="item-label">Total Games Played:</span>
+                <span class="item-value">2,456</span>
+            </li>
+            <li class="account-list-item">
+                <span class="item-label">Account Balance:</span>
+                <span class="item-value">$5,250.00</span>
+            </li>
+            <li class="account-list-item">
+                <span class="item-label">Verification Status:</span>
+                <span class="item-value" style="color: #00a86b;">✓ Verified</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="settings-section">
+        <h3>⚙️ Account Settings</h3>
+        <button class="settings-button">🔐 Change Password</button>
+        <button class="settings-button">📧 Update Email</button>
+        <button class="settings-button">🔔 Notifications</button>
+        <button class="settings-button danger">🚪 Logout</button>
+    </div>
+
+</main>
+
+<script>
+    const decreaseBtn = document.getElementById('decreaseBtn');
+    const increaseBtn = document.getElementById('increaseBtn');
+    const percentageInput = document.getElementById('percentageInput');
+    const payoutDisplay = document.getElementById('payoutPercentDisplay');
+    const balanceDisplay = document.getElementById('balancePercentDisplay');
+
+    function updateDisplay() {
+        const percentage = parseInt(percentageInput.value) || 0;
+        const payout = 100 - percentage;
+        payoutDisplay.textContent = payout;
+        balanceDisplay.textContent = percentage;
+    }
+
+    decreaseBtn.addEventListener('click', () => {
+        let value = parseInt(percentageInput.value) || 0;
+        percentageInput.value = Math.max(0, value - 5);
+        updateDisplay();
+    });
+
+    increaseBtn.addEventListener('click', () => {
+        let value = parseInt(percentageInput.value) || 0;
+        percentageInput.value = Math.min(100, value + 5);
+        updateDisplay();
+    });
+
+    percentageInput.addEventListener('change', updateDisplay);
+    percentageInput.addEventListener('input', updateDisplay);
+
+    // Settings button handlers
+    document.querySelectorAll('.settings-button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const action = this.textContent.trim();
+            if (action.includes('Logout')) {
+                alert('Logging out...');
+                // window.location.href = '/';
+            } else {
+                alert(`${action} - Feature coming soon!`);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

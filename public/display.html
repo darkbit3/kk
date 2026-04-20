@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arada bingo</title>
+  <style>
+    :root {
+      --background-color: #222;
+      --container-background: #111;
+      --grid-background: #111;
+      --hover-background: #ff4747;
+      --label-color: #ff4747;
+      --font-family: 'Arial', sans-serif;
+      --font-size-label: 6vw;
+      --font-size-number: 3.4vw;
+      --font-size-payout: 3vw;
+      --container-padding: 2vw;
+      --payout-gradient: radial-gradient(circle, #ffcc00, #ff9900);
+      --payout-shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-family: var(--font-family);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .bingo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--container-padding);
+      background-color: var(--container-background);
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      height: 65vh;
+      min-height: 400px;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+
+    .bingo-labels {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-right: 3vw;
+      color: var(--label-color);
+      font-size: var(--font-size-label);
+      font-weight: bold;
+      text-align: center;
+      background-color: white;
+    }
+
+    @media (min-width: 1400px) {
+      .bingo-labels {
+        display: flex;
+      }
+    }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      gap: clamp(5px, 2vw, 15px);
+      width: 90%;
+      max-width: 1200px;
+      padding: 20px;
+    }
+
+    .bingo-grid div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--grid-background);
+      border-radius: 20px;
+      aspect-ratio: 1;
+      min-height: 40px;
+      color: #504f4f;
+      font-size: clamp(12px, 4vw, 36px);
+      font-weight: bold;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .marked {
+      background-color: yellow;
+      color: black;
+    }
+
+    .bingo-grid div:hover {
+      transform: scale(1.1);
+      cursor: pointer;
+    }
+
+    .payout-display {
+      color: black;
+      border-radius: 50%;
+      padding: clamp(15px, 3vw, 30px);
+      text-align: center;
+      width: clamp(80px, 12vw, 150px);
+      height: clamp(80px, 12vw, 150px);
+      position: fixed;
+      bottom: clamp(10px, 2vh, 30px);
+      right: clamp(10px, 2vw, 30px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: clamp(8px, 1.5vw, 20px) solid red;
+      background-color: white;
+      z-index: 10;
+    }
+
+    .payout-value {
+      font-size: clamp(20px, 5vw, 50px);
+      font-weight: bold;
+      color: black;
+      text-transform: uppercase;
+    }
+
+    .number-display {
+      width: clamp(100px, 15vw, 200px);
+      height: clamp(100px, 15vw, 200px);
+      background-color: yellow;
+      color: black;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      bottom: clamp(60px, 10vh, 100px);
+      left: clamp(10px, 2vw, 40px);
+      font-size: clamp(40px, 10vw, 120px);
+      font-weight: bold;
+      z-index: 8;
+    }
+
+    .inner-circle {
+      width: clamp(60px, 10vw, 120px);
+      height: clamp(60px, 10vw, 120px);
+      background-color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: black;
+      font-size: clamp(20px, 5vw, 50px);
+      font-weight: bold;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .small-text {
+      font-size: clamp(12px, 2vw, 24px);
+      position: absolute;
+      top: clamp(5px, 1vh, 15px);
+    }
+
+    .number-container {
+      position: fixed;
+      bottom: clamp(10px, 2vh, 30px);
+      left: clamp(10px, 2vw, 30px);
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 2vw, 25px);
+      z-index: 8;
+    }
+
+    .history-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: clamp(10px, 2vw, 20px);
+      padding: clamp(5px, 1vw, 15px);
+      position: fixed;
+      bottom: clamp(120px, 20vh, 200px);
+      left: 50%;
+      transform: translateX(-50%);
+      flex-wrap: wrap;
+      max-width: 90%;
+      z-index: 7;
+    }
+
+    .number-history {
+      width: clamp(50px, 8vw, 80px);
+      height: clamp(50px, 8vw, 80px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: clamp(3px, 0.5vw, 8px);
+      font-size: clamp(14px, 3vw, 24px);
+      color: white;
+      flex-shrink: 0;
+    }
+
+    #history-1 { background-color: red; }
+    #history-2 { background-color: blue; }
+    #history-3 { background-color: green; }
+    #history-4 { background-color: orange; }
+    #history-5 { background-color: purple; }
+
+    .button-container {
+      position: fixed;
+      bottom: clamp(10px, 2vh, 40px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(5px, 1vh, 15px);
+      z-index: 9;
+    }
+
+    .button-container button {
+      width: clamp(120px, 20vw, 180px);
+      height: clamp(35px, 6vh, 50px);
+      font-size: clamp(14px, 2.5vw, 18px);
+      background-color: #22232c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .button-container button:hover {
+      background-color: #2ac41c;
+    }
+
+    .selector-container {
+      position: fixed;
+      bottom: clamp(150px, 25vh, 250px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 1.5vw, 15px);
+      padding: clamp(10px, 2vw, 20px);
+      background-color: black;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 9;
+    }
+
+    .previous-number-container {
+      position: fixed;
+      width: clamp(70px, 12vw, 120px);
+      height: clamp(70px, 12vw, 120px);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      bottom: clamp(100px, 18vh, 180px);
+      right: clamp(20px, 3vw, 50px);
+      background-color: darkorange;
+      z-index: 7;
+    }
+
+    .total-calls-container {
+      display: none;
+      bottom: clamp(80px, 15vh, 150px);
+      right: clamp(150px, 20vw, 250px);
+      background-color: lightgreen;
+      z-index: 7;
+    }
+
+    .total-calls-display {
+      font-size: clamp(24px, 4vw, 44px);
+      color: lightgreen;
+    }
+
+    .previous-number-display {
+      color: white;
+      font-size: clamp(14px, 2.5vw, 24px);
+    }
+
+    .color-button-container {
+      position: fixed;
+      bottom: clamp(250px, 35vh, 350px);
+      left: clamp(10px, 2vw, 30px);
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      width: clamp(100%, calc(100% - 20px), 450px);
+      z-index: 6;
+    }
+
+    .color-button-container button {
+      width: 100%;
+      height: clamp(20px, 3vh, 35px);
+      border: none;
+      border-radius: 0px;
+      cursor: pointer;
+      font-size: clamp(12px, 1.8vw, 18px);
+      color: white;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .color-button-container button:hover {
+      opacity: 0.8;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .blinked {
+      animation: blink 0.5s infinite;
+    }
+
+    .blink {
+      background-color: yellow;
+      animation: blink-animation 0.5s infinite alternate;
+    }
+
+    @keyframes blink-animation {
+      from { background-color: yellow; }
+      to { background-color: white; }
+    }
+
+    .buttons-container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+
+    .close-btn, .block-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .block-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .close-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .block-btn:hover {
+      background-color: #1976D2;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    h2 {
+      font-size: clamp(1.2em, 2vw, 1.8em);
+      margin: clamp(0.3em, 1vh, 0.6em) 0;
+    }
+
+    input[type="range"] {
+      width: clamp(150px, 90%, 400px);
+      height: clamp(30px, 5vh, 50px);
+      background: #ddd;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: clamp(30px, 5vw, 50px);
+      height: clamp(30px, 5vw, 50px);
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: clamp(30px, 5vw, 50px);
+      height: clamp(30px, 5vw, 50px);
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+      border: none;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: #4CAF50;
+      cursor: pointer;
+    }
+
+    #previous-number {
+      font-size: 4em;
+      color: #333;
+      font-weight: bold;
+      padding: 5px;
+      display: inline-block;
+    }
+
+    #total-calls {
+      font-size: 2em;
+      color: white;
+      font-weight: bold;
+      padding: 5px;
+      background-color: lightgreen;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .marked {
+      background-color: yellow;
+      color: black;
+    }
+
+    #cardIdInput {
+      width: 150px;
+      padding: 10px;
+      font-size: 16px;
+      position: absolute;
+      bottom: 60px;
+      left: 500px;
+      border: 2px solid #393a3b;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #cardIdInput:focus {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #fetchButton {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      position: absolute;
+      bottom: 15px;
+      left: 500px;
+      background-color: #000000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #fetchButton:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      width: 50%;
+      max-width: 600px;
+      transform: translateY(-100px);
+      transition: transform 0.5s ease;
+    }
+
+    .modal-content.show {
+      transform: translateY(0);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 600px;
+      height: 90px;
+      margin: 20px 0;
+      font-size: 48px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    th {
+      background-color: #b30d0d;
+      color: white;
+      padding: 8px;
+    }
+
+    td {
+      width: 300px;
+      height: 40px;
+      text-align: center;
+      border: 2px solid #007bff;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    td:hover {
+      background-color: rgba(0, 123, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .free-space {
+      background-color: green;
+      color: gold;
+      font-weight: bold;
+    }
+
+    .marked {
+      background-color: rgb(179, 20, 131);
+      font-weight: bold;
+    }
+
+    .block-button {
+      background-color: #dc3545;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      color: white;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    .block-button:hover {
+      background-color: #c82333;
+      transform: scale(1.05);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #90ccab;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.5em;
+    }
+
+    .free-space {
+      background-color: green;
+    }
+
+    td:hover {
+      background-color: inherit;
+    }
+
+    .marked {
+      background-color: yellow;
+    }
+
+    .found {
+      background-color: red;
+    }
+
+    #bingoCardModal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: black;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid white;
+      width: 80%;
+      color: white;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover, .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .blink {
+      animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+
+    #message {
+      font-size: 44px;
+      padding: 20px;
+      color: white;
+      position: relative;
+      width: 100%;
+      height: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-weight: bold;
+    }
+
+    #message-text {
+      transform: rotate(-45deg);
+      white-space: nowrap;
+    }
+
+    .blink {
+      background-color: green;
+      transform: scale(1.1);
+      animation: blink-animation 0.2s infinite;
+    }
+
+    @keyframes blink-animation {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    #output {
+      margin-top: 20px;
+      font-size: 30px;
+      font-weight: bold;
+      color:white;
+    }
+
+    #cardValue {
+      color: gold;
+    }
+
+    #voice-select {
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: white;
+      transition: border-color 0.3s ease;
+    }
+
+    #voice-select:focus {
+      border-color: #5b9bd5;
+      outline: none;
+    }
+
+    #speed-select {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: #ddd;
+      border-radius: 5px;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #speed-select::-webkit-slider-runnable-track {
+      height: 8px;
+      background: #6e7fcc;
+      border-radius: 5px;
+    }
+
+    #speed-select::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #4a5ab3;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #speed-select:focus {
+      outline: none;
+    }
+
+    #speed-select:hover {
+      background: #bbb;
+    }
+
+    #mixButton {
+      position: fixed;
+      left: 50%;
+      bottom: 40px;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: #008CBA;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    #mixButton:hover {
+      background-color: #005f6a;
+      transform: scale(1.1);
+    }
+
+    #mixButton:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #005f6a;
+    }
+
+    #mixButton:active {
+      background-color: #003f47;
+      transform: scale(1);
+    }
+
+    .l33 {
+      font-size: 2em;
+      color: white;
+      background-color: green;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    /* Enhanced bonus popup styles */
+    .bonus-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, #ffd700, #ffed4e);
+      border: 5px solid #ff6b00;
+      border-radius: 25px;
+      padding: 50px;
+      z-index: 1000;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 107, 0, 0.9), 
+                  0 0 60px rgba(255, 215, 0, 0.7),
+                  inset 0 0 30px rgba(255, 255, 255, 0.8);
+      display: none;
+      animation: bonusBlink 0.3s infinite;
+    }
+
+    .bonus-popup.show {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @keyframes bonusBlink {
+      0%, 100% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1); 
+        box-shadow: 0 0 40px rgba(255, 107, 0, 0.9), 
+                    0 0 60px rgba(255, 215, 0, 0.7),
+                    inset 0 0 30px rgba(255, 255, 255, 0.8);
+      }
+      50% { 
+        opacity: 0.85; 
+        transform: translate(-50%, -50%) scale(1.15); 
+        box-shadow: 0 0 60px rgba(255, 107, 0, 1), 
+                    0 0 100px rgba(255, 215, 0, 1),
+                    inset 0 0 40px rgba(255, 255, 255, 1);
+      }
+    }
+
+    .bonus-popup-title {
+      font-size: 40px;
+      font-weight: bold;
+      color: #ff6b00;
+      margin-bottom: 20px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 107, 0, 0.6);
+      animation: titlePulse 0.4s infinite;
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .bonus-popup-amount {
+      font-size: 56px;
+      font-weight: bold;
+      color: #ff6b00;
+      margin: 25px 0;
+      text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 107, 0, 0.7);
+      animation: amountPulse 0.5s infinite;
+    }
+
+    @keyframes amountPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .bonus-popup-number {
+      font-size: 28px;
+      color: #006600;
+      margin-top: 20px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .bonus-popup-close {
+      margin-top: 25px;
+      padding: 12px 25px;
+      background-color: #ff6b00;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+
+    .bonus-popup-close:hover {
+      background-color: #e55a00;
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .bonus-confetti {
+      position: fixed;
+      pointer-events: none;
+      border-radius: 50%;
+    }
+
+    #cardIdInput {
+      position: fixed;
+      bottom: clamp(80px, 15vh, 120px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(100px, 25vw, 250px);
+      padding: clamp(8px, 1.5vw, 15px);
+      font-size: clamp(12px, 2vw, 18px);
+      border: 2px solid #393a3b;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 9;
+    }
+
+    #fetchButton {
+      padding: clamp(8px, 1.5vw, 15px) clamp(12px, 2vw, 20px);
+      font-size: clamp(12px, 2vw, 16px);
+      cursor: pointer;
+      position: fixed;
+      bottom: clamp(30px, 6vh, 60px);
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #000000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+      z-index: 9;
+    }
+
+    @media (max-width: 480px) {
+      .bingo-container {
+        height: 55vh;
+        padding: 8px;
+      }
+
+      .bingo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+        width: 95%;
+      }
+
+      .history-container {
+        bottom: clamp(80px, 12vh, 140px);
+      }
+
+      .button-container {
+        bottom: clamp(200px, 28vh, 280px);
+      }
+
+      .selector-container {
+        display: none;
+      }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      .bingo-container {
+        height: 60vh;
+        padding: 12px;
+      }
+
+      .bingo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+        width: 90%;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .bingo-container {
+        height: 65vh;
+      }
+
+      .bingo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        width: 85%;
+      }
+    }
+
+    @media (min-width: 1025px) and (max-width: 1400px) {
+      .bingo-container {
+        height: 70vh;
+      }
+
+      .bingo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+        width: 80%;
+      }
+    }
+
+    @media (min-width: 1401px) {
+      .bingo-container {
+        height: 75vh;
+      }
+
+      .bingo-grid {
+        grid-template-columns: repeat(15, 1fr);
+        width: 90%;
+        max-width: 1400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bingo-container">
+      <div class="bingo-labels">
+          <div>B</div>
+          <div>I</div>
+          <div>N</div>
+          <div>G</div>
+          <div>O</div>
+      </div>
+      
+      <div class="bingo-grid">
+          <!-- B row -->
+          <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
+          <div>6</div><div>7</div><div>8</div><div>9</div><div>10</div>
+          <div>11</div><div>12</div><div>13</div><div>14</div><div>15</div>
+          <!-- I row -->
+          <div>16</div><div>17</div><div>18</div><div>19</div><div>20</div>
+          <div>21</div><div>22</div><div>23</div><div>24</div><div>25</div>
+          <div>26</div><div>27</div><div>28</div><div>29</div><div>30</div>
+          <!-- N row -->
+          <div>31</div><div>32</div><div>33</div><div>34</div><div>35</div>
+          <div>36</div><div>37</div><div>38</div><div>39</div><div>40</div>
+          <div>41</div><div>42</div><div>43</div><div>44</div><div>45</div>
+          <!-- G row -->
+          <div>46</div><div>47</div><div>48</div><div>49</div><div>50</div>
+          <div>51</div><div>52</div><div>53</div><div>54</div><div>55</div>
+          <div>56</div><div>57</div><div>58</div><div>59</div><div>60</div>
+          <!-- O row -->
+          <div>61</div><div>62</div><div>63</div><div>64</div><div>65</div>
+          <div>66</div><div>67</div><div>68</div><div>69</div><div>70</div>
+          <div>71</div><div>72</div><div>73</div><div>74</div><div>75</div>
+      </div>
+  </div>
+  
+  <div class="payout-display">
+      <div class="payout-value">{{ payout_value }}</div>
+  </div>
+
+  <div class="number-display">
+    <div class="inner-circle">
+      <div class="small-text">0</div>
+      <div>{{ number }}</div>
+    </div>
+  </div>
+  
+  <div class="number-container">
+      <div class="history-container">
+          <div class="number-history" id="history-1">0</div>
+          <div class="number-history" id="history-2">0</div>
+          <div class="number-history" id="history-3">0</div>
+          <div class="number-history" id="history-4">0</div>
+          <div class="number-history" id="history-5">0</div>
+      </div>
+  </div>
+
+  <div class="button-container">
+    <button onclick="nextNumber()">call Next number</button>
+      <button id="autoButton" onclick="toggleAuto()"> Auto play</button>
+      <button onclick="showResetConfirm()">Reset board</button>
+      <button onclick="shuffleNumbers()">Shuffle board</button> 
+  </div>
+
+  <!-- Reset Game Confirmation Modal -->
+  <div id="resetConfirmModal" class="modal">
+    <div class="modal-content" style="width: 400px; background-color: #333; color: white; border: 2px solid #ff6b00; text-align: center; top: 50%; transform: translate(-50%, -50%); position: fixed; left: 50%;">
+      <h2 style="color: #ff6b00; margin-top: 0;">Reset New Game?</h2>
+      <p style="font-size: 16px; margin: 20px 0;">Are you sure you want to reset the board and start a new game?</p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button onclick="closeResetConfirm()" style="padding: 10px 20px; background-color: #888; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">Cancel</button>
+        <button onclick="confirmReset()" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="selector-container">
+      <select id="voice-select" onchange="updateVoice()">
+          <option value="default">Default</option>
+          <option value="male">Male Voice</option>
+          <option value="female">Female Voice</option>
+        </select>
+      <input type="number" id="speed-select" min="0" max="5000" value="1000" step="10" oninput="updateSpeed()" style="margin-left: 10px; border-radius: 5px; border: 1px solid #6e7fcc; padding: 5px;">
+    </div>
+  </div>
+
+  <input type="number" id="cardIdInput" placeholder="Enter Card ID (1-2000)">
+
+  <button id="fetchButton">Check Bingo winner</button>
+  
+  <!-- Modal for displaying the Bingo card -->
+  <div id="bingoCardModal" class="modal">
+      <div class="modal-content">
+        <div id="message"></div>
+        <div id="modalHeader" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="display:flex;gap:16px;align-items:center;">
+            <div style="font-weight:bold;color:white;">Selected: <span id="modalSelectedNumber"></span></div>
+            <div style="font-weight:bold;color:white;">Confirm: <span id="modalConfirmNumber"></span></div>
+            <div style="font-weight:bold;color:white;">Board #: <span id="modalBoardNumber"></span></div>
+          </div>
+        </div>
+        <div id="output">Board number: <span id="cardValue"></span></div><div class="l33"> </div>
+          <span class="close">&times;</span>
+          <div id="bingoCardContainer"></div>
+          <button class="block-button" id="blockButton">Block All Numbers</button>
+      </div>
+  </div>
+
+  <!-- Bonus Popup -->
+  <div id="bonusPopup" class="bonus-popup">
+      <div class="bonus-popup-title">🎁 BONUS! 🎁</div>
+      <div class="bonus-popup-amount" id="bonusAmount">$0.00</div>
+      <div class="bonus-popup-number" id="bonusNumber">Number #0</div>
+      <button class="bonus-popup-close" onclick="closeBonusPopup()">Collect Bonus</button>
+  </div>
+
+  <div class="total-calls-container">
+      <span id="total-calls">0/75</span>
+  </div>
+  <button id="mixButton">Mix </button>
+  <div class="previous-number-container">
+      <span id="previous-number">0</span>
+  </div>
+  
+  <audio id="number-sound" src="" preload="auto"></audio>
+  <audio id="start-sound" src="static/sound/start.mp3" preload="auto"></audio>
+  <audio id="stop-sound" src="static/sound/stop.mp3" preload="auto"></audio>
+  <audio id="shuffle-sound" src="static/sound/shuffle.mp3" preload="auto"></audio>
+  <audio id="block-sound" src="C:/records/static/sound/block.mp3" preload="auto"></audio>
+  <audio id="blockSound" src="C:/records/static/sound/block.mp3"></audio>
+  <audio id="audio" src="/static/sound/block.mp3"></audio>
+  
+  <div class="color-button-container">
+      <button onclick="changeColor('black')" style="background-color: black; color: white;">Black</button>
+      <button onclick="changeColor('blue')" style="background-color: blue; color: white;">Blue</button>
+      <button onclick="changeColor('green')" style="background-color: green; color: white;">Green</button>
+      <button onclick="changeColor('yellow')" style="background-color: yellow; color: black;">Yellow</button>
+  </div>
+
+<script>
+// Global variables for bonus system
+let calledNumbers = new Set();
+let bonuses = [];
+let bonusWinnings = [];
+
+// Track the last called number globally
+let lastCalledNumber = null;
+let lastBonusAwarded = null; // Track awarded bonus to prevent duplicate awards
+
+// Initialize bonuses
+function initializeBonuses() {
+    bonuses = [
+        { number: 1, amount: 50.00 },
+        { number: 5, amount: 25.00 },
+        { number: 3, amount: 100.00 },
+        { number: 2, amount: 75.00 },
+        { number: 4, amount: 150.00 }
+    ];
+    localStorage.setItem('bingoBonuses', JSON.stringify(bonuses));
+    console.log("[v0] Bonuses initialized:", bonuses);
+}
+
+// Function to fetch shuffled numbers
+function fetchShuffledNumbers() {
+    fetch('http://127.0.0.1:5000/randomize_numbers')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.shuffledNumbers) {
+                console.log('Shuffled Numbers: ', data.shuffledNumbers);
+                alert('Shuffled Numbers: ' + data.shuffledNumbers.join(', '));
+            } else {
+                console.error('Error:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+// Select the button by its ID
+const mixButton = document.getElementById('mixButton');
+
+// Add an event listener for the button click
+mixButton.addEventListener('click', function() {
+    // Trigger the Flask route to empty dis.txt
+    fetch('http://127.0.0.1:5000/empty_dis_txt')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);  // Output: dis.txt has been emptied.
+            // Fetch shuffled numbers after emptying the file
+            fetchShuffledNumbers();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+});
+
+// Get the input field and output div
+const inputField = document.getElementById('cardIdInput');
+const cardValueSpan = document.getElementById('cardValue');
+
+// Listen for input events on the input field
+inputField.addEventListener('input', function() {
+    const inputValue = inputField.value;
+    
+    // Update the output with the number in green
+    if(inputValue) {
+        cardValueSpan.textContent = inputValue;
+    } else {
+        cardValueSpan.textContent = '';
+    }
+});
+
+function updateSpeed() {
+    const speedValue = document.getElementById("speed-select").value;
+    console.log(`Current speed: ${speedValue}`);
+}
+
+// Reset game functions
+function showResetConfirm() {
+    document.getElementById('resetConfirmModal').style.display = 'block';
+}
+
+function closeResetConfirm() {
+    document.getElementById('resetConfirmModal').style.display = 'none';
+}
+
+function confirmReset() {
+    // Close the modal
+    document.getElementById('resetConfirmModal').style.display = 'none';
+    // Redirect to cashier/home page
+    window.location.href = '/';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const resetModal = document.getElementById('resetConfirmModal');
+    if (event.target == resetModal) {
+        resetModal.style.display = 'none';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelector('.total-calls-container').style.display = 'none';
+    document.getElementById('mixButton').style.display = 'none';
+    loadBonusesFromStorage(); // Load bonuses when DOM is ready
+    monitorBonusState(); // Start monitoring bonus state
+});
+
+let lines = [];
+let currentLine = 0;
+let interval;
+let totalCalls = 0;
+let previousNumber = 0;
+let displaySpeed = 2000;
+let isAuto = false;
+
+async function loadFile() {
+    const response = await fetch('/numbers');
+    lines = await response.json();
+}
+
+function toggleAuto() {
+    const startSound = document.getElementById('start-sound');
+    const stopSound = document.getElementById('stop-sound');
+
+    isAuto = !isAuto;
+
+    if (isAuto) {
+        loadFile().then(() => {
+            interval = setInterval(displayNextLine, displaySpeed);
+            startSound.play().catch(error => console.error('Error playing start sound:', error));
+            document.getElementById('autoButton').innerText = 'Stop Auto';
+        });
+    } else {
+        clearInterval(interval);
+        interval = null;
+        stopSound.play().catch(error => console.error('Error playing stop sound:', error));
+        document.getElementById('autoButton').innerText = 'Start Auto';
+    }
+}
+
+function displayNextLine() {
+    if (currentLine >= lines.length) {
+        clearInterval(interval);
+        interval = null;
+        currentLine = 0; // Reset for next start
+        document.getElementById("autoButton").innerText = "Start Auto";
+        return;
+    }
+
+    const currentNumber = lines[currentLine];
+    markNumber(currentNumber);
+    document.querySelector('.number-display').innerText = currentNumber;
+
+    // Update previous number
+    document.getElementById("previous-number").innerText = previousNumber;
+    previousNumber = currentNumber;
+
+    updateHistory(currentNumber);
+    totalCalls++;
+    updateTotalCallsDisplay();
+    playSound(currentNumber);
+    currentLine++;
+}
+
+function nextNumber() {
+    displayNextLine();
+}
+
+function markNumber(number) {
+    const cells = document.querySelectorAll('.bingo-grid div');
+
+    cells.forEach(cell => {
+        if (cell.innerText == number) {
+            cell.classList.add('marked');
+            cell.style.color = 'white';
+
+            // Send the number to app.py
+            sendNumberToServer(number);
+
+            // Optionally, blink or highlight
+            cell.classList.add('blinked');
+            setTimeout(() => {
+                cell.classList.remove('blinked');
+            }, 1000);
+        }
+    });
+    
+    lastCalledNumber = number;
+    markNumberCalled(number); // Track for bonus detection
+}
+
+function sendNumberToServer(number) {
+    fetch('/mark-number', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ number: number }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function updateHistory(number) {
+    const historyCells = document.querySelectorAll('.number-history');
+    for (let i = historyCells.length - 1; i > 0; i--) {
+        historyCells[i].innerText = historyCells[i - 1].innerText;
+    }
+    historyCells[0].innerText = number;
+}
+
+function updateTotalCallsDisplay() {
+    document.getElementById("total-calls").innerText = `${totalCalls}/75`;
+}
+
+function updateSpeed() {
+    displaySpeed = document.getElementById("speed-select").value;
+
+    if (interval) {
+        clearInterval(interval);
+        interval = setInterval(displayNextLine, displaySpeed);
+    }
+}
+
+function playSound(number) {
+    const audio = document.getElementById('number-sound');
+    audio.src = `/static/sound/${number}.mp3`;
+    audio.load();
+    audio.play().catch(error => {
+        console.error('Error playing sound:', error);
+    });
+}
+
+function changeColor(color) {
+    const divs = document.querySelectorAll('.bingo-grid div');
+    divs.forEach(div => {
+        div.style.backgroundColor = color;
+    });
+}
+
+function shuffleNumbers() {
+    const allDivs = document.querySelectorAll('.bingo-grid div');
+    const totalTime = 8500;
+    const intervalTime = 200;
+    const numberOfBlinks = totalTime / intervalTime;
+
+    allDivs.forEach(div => div.classList.remove('blink'));
+
+    let blinkCount = 0;
+    const blinkInterval = setInterval(() => {
+        allDivs.forEach(div => div.classList.remove('blink'));
+
+        const indices = new Set();
+        while (indices.size < 23) {
+            indices.add(Math.floor(Math.random() * allDivs.length));
+        }
+
+        indices.forEach(index => {
+            allDivs[index].classList.add('blink');
+        });
+
+        blinkCount++;
+        if (blinkCount >= numberOfBlinks) {
+            clearInterval(blinkInterval);
+            allDivs.forEach(div => div.classList.remove('blink'));
+        }
+    }, intervalTime);
+
+    const shuffleSound = document.getElementById('shuffle-sound');
+    shuffleSound.currentTime = 0;
+    shuffleSound.play().catch(error => {
+        console.error('Error playing shuffle sound:', error);
+    });
+}
+
+function newGame() {
+    fetch('/new-game', { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                console.log("Game reset!");
+                window.location.href = "http://127.0.0.1:5000/";
+            } else {
+                console.error("Failed to reset game.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+}
+
+// Enhanced bonus functions
+function showBingoMessageWithBonus(patterns, container) {
+    const message = document.createElement('div');
+    message.classList.add('l33');
+    const patternsText = patterns.map(p => p.pattern).join(', ');
+    message.textContent = `Good Bingo! patterns: ${patternsText}`;
+    container.appendChild(message);
+    container.style.color = 'white';
+    
+    const audioPath = 'file:///C:/records/static/sound/voice.mp3';
+    const audio = new Audio(audioPath);
+    
+    audio.play().catch(e => {
+        console.error("Audio playback failed:", e);
+        const webPath = '/static/sound/voice.mp3';
+        const fallbackAudio = new Audio(webPath);
+        fallbackAudio.play().catch(e => {
+            console.error("Fallback audio failed:", e);
+            alert("Bingo! Patterns: " + patternsText);
+        });
+    });
+    
+    setTimeout(() => {
+        checkAndShowBonus(patterns);
+    }, 500);
+}
+
+async function displayBingoCard(card) {
+    const { numbersSet, lastNumber } = await fetchNumbers();
+    const container = document.getElementById('bingoCardContainer');
+    container.innerHTML = '';
+
+  // Update modal header: show selected board ID and the confirm/last called number
+  const cardIdInputEl = document.getElementById('cardIdInput');
+  const cardIdVal = parseInt(cardIdInputEl && cardIdInputEl.value, 10);
+  const modalBoardEl = document.getElementById('modalBoardNumber');
+  const modalConfirmEl = document.getElementById('modalConfirmNumber');
+  if (modalBoardEl) modalBoardEl.textContent = isNaN(cardIdVal) ? '' : cardIdVal;
+  if (modalConfirmEl) modalConfirmEl.textContent = (typeof lastNumber !== 'undefined' && lastNumber !== null) ? lastNumber : (lastCalledNumber || '');
+  const modalSelectedEl = document.getElementById('modalSelectedNumber');
+  if (modalSelectedEl) modalSelectedEl.textContent = (lastCalledNumber !== null && typeof lastCalledNumber !== 'undefined') ? lastCalledNumber : (typeof lastNumber !== 'undefined' && lastNumber !== null ? lastNumber : '');
+
+    const table = document.createElement('table');
+    const headerRow = document.createElement('tr');
+    ['B', 'I', 'N', 'G', 'O'].forEach(letter => {
+        const th = document.createElement('th');
+        th.textContent = letter;
+        headerRow.appendChild(th);
+    });
+    table.appendChild(headerRow);
+
+    const markedCells = new Set();
+    const bingoPatterns = [];
+    let messageShown = false;
+
+    card.forEach((row, rowIndex) => {
+        const tableRow = document.createElement('tr');
+        row.forEach((num, colIndex) => {
+            const td = document.createElement('td');
+            td.textContent = num;
+            if (num === 'X') {
+                td.classList.add('free-space');
+            } else if (numbersSet.has(num)) {
+                td.classList.add('found');
+            }
+            tableRow.appendChild(td);
+        });
+        table.appendChild(tableRow);
+    });
+
+    container.appendChild(table);
+
+    let timer = 0;
+    const timerElement = document.createElement('div');
+    timerElement.id = 'timer';
+    timerElement.textContent = `Time: ${timer}s`;
+    container.appendChild(timerElement);
+
+    const timerInterval = setInterval(() => {
+        timer++;
+        timerElement.textContent = `Time: ${timer}s`;
+    }, 1000);
+
+    function autoCheckBingo() {
+        card.forEach((row) => {
+            row.forEach((num) => {
+                if (numbersSet.has(num)) {
+                    markedCells.add(num);
+                    markNumberCalled(num);
+                }
+            });
+        });
+
+        const result = checkBingo(card, markedCells);
+        if (result) {
+            bingoPatterns.push(...result);
+            if (!messageShown) {
+                highlightBingo(bingoPatterns);
+                showBingoMessageWithBonus(bingoPatterns, container);
+                messageShown = true;
+                clearInterval(checkInterval);
+            }
+        } else if (!messageShown) {
+            showLostMessage();
+            messageShown = true;
+            clearInterval(checkInterval);
+        }
+    }
+
+    if (numbersSet.has(lastNumber)) {
+        const lastCell = Array.from(container.querySelectorAll('td')).find(cell => cell.textContent == lastNumber);
+        if (lastCell) {
+            lastCell.classList.add('blink');
+        }
+    }
+
+    openModal();
+
+    const checkInterval = setInterval(autoCheckBingo, 2000);
+}
+
+function closeModal() {
+    document.getElementById('bingoCardModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('bingoCardModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+const bingoCards = [
+    [
+        [13, 28, 39, 60, 69],
+        [9, 26, 37, 48, 74],
+        [4, 17, 'X', 59, 68],
+        [3, 16, 45, 47, 70],
+        [2, 21, 40, 58, 65]
+    ],
+    [
+        [9, 16, 37, 52, 70],
+        [10, 29, 32, 49, 68],
+        [15, 18, 'X', 55, 61],
+        [2, 30, 33, 58, 69],
+        [1, 20, 42, 54, 62]
+    ],
+    [
+        [14, 21, 40, 47, 61],
+        [2, 23, 37, 58, 74],
+        [1, 30, 'X', 49, 67],
+        [4, 22, 35, 48, 65],
+        [10, 27, 41, 46, 63]
+    ],
+    [
+        [4, 25, 37, 46, 61],
+        [14, 17, 40, 60, 62],
+        [2, 16, 'X', 49, 65],
+        [12, 21, 45, 52, 63],
+        [8, 22, 32, 48, 64]
+    ],
+    [
+        [7, 16, 37, 60, 62],
+        [13, 19, 43, 57, 73],
+        [5, 27, 'X', 59, 61],
+        [12, 30, 32, 53, 66],
+        [8, 24, 35, 49, 68]
+    ],
+    [
+        [1, 18, 31, 51, 67],
+        [6, 21, 45, 56, 63],
+        [4, 17, 'X', 47, 70],
+        [7, 28, 42, 55, 73],
+        [13, 30, 43, 48, 64]
+    ],
+    [
+        [7, 27, 34, 55, 71],
+        [15, 21, 45, 50, 68],
+        [8, 29, 'X', 52, 74],
+        [13, 20, 36, 52, 70],
+        [3, 26, 39, 51, 65]
+    ],
+    [
+        [14, 20, 31, 57, 72],
+        [4, 28, 43, 58, 62],
+        [15, 30, 'X', 56, 64],
+        [13, 21, 34, 46, 68],
+        [2, 17, 41, 53, 74]
+    ],
+    [
+        [15, 21, 36, 50, 68],
+        [5, 22, 33, 55, 71],
+        [8, 27, 'X', 52, 75],
+        [1, 17, 31, 53, 69],
+        [13, 28, 42, 58, 61]
+    ],
+    [
+        [10, 23, 37, 56, 61],
+        [2, 26, 33, 59, 69],
+        [12, 21, 'X', 53, 72],
+        [6, 19, 41, 60, 70],
+        [9, 27, 34, 46, 62]
+    ]
+];
+
+async function fetchNumbers() {
+    const response = await fetch('/dis.txt');
+    const text = await response.text();
+    const numbersArray = text.split('\n').map(num => parseInt(num.trim(), 10)).filter(num => !isNaN(num));
+    const numbersSet = new Set(numbersArray);
+    const lastNumber = numbersArray[numbersArray.length - 1];
+    return { numbersSet, lastNumber };
+}
+
+function checkBingo(card, markedCells) {
+    const patterns = [];
+
+    for (let i = 0; i < 5; i++) {
+        if (card[i].every(num => markedCells.has(num) || num === 'X')) {
+            patterns.push({ pattern: 'row', index: i });
+        }
+    }
+
+    for (let j = 0; j < 5; j++) {
+        if (card.every(row => markedCells.has(row[j]) || row[j] === 'X')) {
+            patterns.push({ pattern: 'column', index: j });
+        }
+    }
+
+    if (card.every((row, i) => markedCells.has(row[i]) || row[i] === 'X')) {
+        patterns.push({ pattern: 'diagonal1' });
+    }
+
+    if (card.every((row, i) => markedCells.has(row[4 - i]) || row[i] === 'X')) {
+        patterns.push({ pattern: 'diagonal2' });
+    }
+
+    if (
+        (markedCells.has(card[0][0]) || card[0][0] === 'X') &&
+        (markedCells.has(card[0][4]) || card[0][4] === 'X') &&
+        (markedCells.has(card[4][0]) || card[4][0] === 'X') &&
+        (markedCells.has(card[4][4]) || card[4][4] === 'X')
+    ) {
+        patterns.push({ pattern: 'corners' });
+    }
+
+    return patterns.length > 0 ? patterns : null;
+}
+
+function highlightBingo(patterns) {
+    const container = document.getElementById('bingoCardContainer');
+    const rows = Array.from(container.querySelectorAll('tr'));
+    patterns.forEach(pattern => {
+        if (pattern.pattern === 'row') {
+            const winningRow = rows[pattern.index + 1];
+            Array.from(winningRow.children).forEach(cell => cell.style.backgroundColor = 'green');
+        } else if (pattern.pattern === 'column') {
+            rows.slice(1).forEach(row => {
+                row.children[pattern.index].style.backgroundColor = 'green';
+            });
+        } else if (pattern.pattern === 'diagonal1') {
+            rows.slice(1).forEach((row, index) => {
+                row.children[index].style.backgroundColor = 'green';
+            });
+        } else if (pattern.pattern === 'diagonal2') {
+            rows.slice(1).forEach((row, index) => {
+                row.children[4 - index].style.backgroundColor = 'green';
+            });
+        } else if (pattern.pattern === 'corners') {
+            const corners = [
+                rows[1].children[0],
+                rows[1].children[4],
+                rows[5].children[0],
+                rows[5].children[4]
+            ];
+            corners.forEach(corner => corner.style.backgroundColor = 'green');
+        }
+    });
+}
+
+function showLostMessage() {
+    const container = document.getElementById('bingoCardContainer');
+    const message = document.createElement('div');
+    message.classList.add('l33');
+    message.textContent = 'board is not win!';
+    container.appendChild(message);
+}
+
+function openModal() {
+    const modal = document.getElementById('bingoCardModal');
+    modal.style.display = "block";
+}
+
+// Bonus system functions - FIXED VERSION
+function loadBonusesFromStorage() {
+    const saved = localStorage.getItem('bingoBonuses');
+    if (saved) {
+        bonuses = JSON.parse(saved);
+        console.log("[v0] Loaded bonuses:", bonuses);
+    } else {
+        initializeBonuses(); // Initialize if no saved data
+    }
+}
+
+function markNumberCalled(number) {
+    calledNumbers.add(number);
+    console.log("[v0] Number marked as called:", number, "Total called:", Array.from(calledNumbers));
+}
+
+function isBonusNumberCalled(number) {
+    return calledNumbers.has(number);
+}
+
+function getBonusInfo(number) {
+    return bonuses.find(b => b.number === number);
+}
+
+function countBingoPatterns(patterns) {
+    return patterns ? patterns.length : 0;
+}
+
+function showBonusPopup(bonusInfo) {
+    const popup = document.getElementById('bonusPopup');
+    const amountEl = document.getElementById('bonusAmount');
+    const numberEl = document.getElementById('bonusNumber');
+    
+    console.log("[v0] Showing bonus popup for:", bonusInfo);
+    
+    amountEl.textContent = `$${bonusInfo.amount.toFixed(2)}`;
+    numberEl.textContent = `Bonus Number #${bonusInfo.number}`;
+    
+    popup.classList.add('show');
+    createConfetti();
+    popup.style.animation = 'bonusBlink 0.4s infinite';
+    
+    setTimeout(() => {
+        closeBonusPopup();
+        popup.style.animation = '';
+    }, 5000);
+}
+
+function closeBonusPopup() {
+    const popup = document.getElementById('bonusPopup');
+    popup.classList.remove('show');
+    console.log("[v0] Bonus popup closed.");
+}
+
+function createConfetti() {
+    const confettiCount = 150;
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'bonus-confetti';
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.top = '-10px';
+        
+        const colors = ['#ffd700', '#ff6b00', '#ffed4e', '#ff69b4', '#00ff00', '#00bfff', '#ff1493', '#00ff7f'];
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = (Math.random() * 10 + 4) + 'px';
+        confetti.style.height = (Math.random() * 10 + 4) + 'px';
+        
+        document.body.appendChild(confetti);
+        
+        const duration = 2.5 + Math.random() * 2;
+        const xMove = (Math.random() - 0.5) * 400;
+        
+        confetti.animate([
+            { transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+            { transform: `translateY(${window.innerHeight}px) translateX(${xMove}px) rotate(720deg)`, opacity: 0 }
+        ], {
+            duration: duration * 1000,
+            easing: 'ease-in'
+        });
+        
+        setTimeout(() => confetti.remove(), duration * 1000);
+    }
+}
+
+// Rule: Award bonus ONLY when checking the LAST called number
+// ALL 5 conditions must be TRUE simultaneously
+function checkAndShowBonus(bingoPatterns) {
+    console.log("[v0] ===BONUS CHECK - FORMAL RULE (ALL 5 CONDITIONS REQUIRED)===");
+    console.log("[v0] Last called number: " + lastCalledNumber);
+    
+    // Condition 5: Must have 2 or more patterns
+    const patternCount = countBingoPatterns(bingoPatterns);
+    console.log("[v0] Condition 5: Pattern count = " + patternCount + " (need 2+)");
+    
+    if (!bingoPatterns || patternCount < 2) {
+        console.log("[v0] ❌ CONDITION 5 FAILED: Only " + patternCount + " pattern(s) - need 2+ for bonus");
+        closeBonusPopup();
+        return false;
+    }
+    
+    console.log("[v0] ✅ CONDITION 5 PASSED: " + patternCount + " patterns exist");
+    
+    if (lastCalledNumber === null) {
+        console.log("[v0] ❌ NO BONUS: Last called number is null");
+        closeBonusPopup();
+        return false;
+    }
+    
+    // Find if the LAST called number matches a bonus
+    const bonusInfo = getBonusInfo(lastCalledNumber);
+    
+    if (!bonusInfo) {
+        console.log("[v0] ❌ CONDITION 3 FAILED: Last called number #" + lastCalledNumber + " is NOT in bonus list");
+        closeBonusPopup();
+        return false;
+    }
+    
+    console.log("[v0] ✅ CONDITION 3 PASSED: #" + lastCalledNumber + " is in bonus list, Amount=$" + bonusInfo.amount.toFixed(2));
+    
+    // Condition 1: Number exists on the bingo card
+    const numberExistsOnCard = doesNumberExistOnCard(lastCalledNumber);
+    if (!numberExistsOnCard) {
+        console.log("[v0] ❌ CONDITION 1 FAILED: #" + lastCalledNumber + " does NOT exist on bingo card");
+        closeBonusPopup();
+        return false;
+    }
+    
+    console.log("[v0] ✅ CONDITION 1 PASSED: #" + lastCalledNumber + " exists on bingo card");
+    
+    // Condition 4: Number must be marked/blinking on main grid
+    const isNumberMarked = isBonusNumberBlinking(lastCalledNumber);
+    if (!isNumberMarked) {
+        console.log("[v0] ❌ CONDITION 4 FAILED: #" + lastCalledNumber + " is NOT marked/blinking on main grid");
+        closeBonusPopup();
+        return false;
+    }
+    
+    console.log("[v0] ✅ CONDITION 4 PASSED: #" + lastCalledNumber + " IS marked/blinking on main grid");
+    
+    // Condition 2: Number belongs to a completed winning pattern
+    let belongsToPattern = false;
+    for (let pattern of bingoPatterns) {
+        if (isBonusInWinningPattern(lastCalledNumber, pattern)) {
+            belongsToPattern = true;
+            console.log("[v0] ✅ CONDITION 2 PASSED: #" + lastCalledNumber + " belongs to " + pattern.pattern + " pattern");
+            break;
+        }
+    }
+    
+    if (!belongsToPattern) {
+        console.log("[v0] ❌ CONDITION 2 FAILED: #" + lastCalledNumber + " does NOT belong to any winning pattern");
+        closeBonusPopup();
+        return false;
+    }
+    
+    if (lastBonusAwarded === lastCalledNumber) {
+        console.log("[v0] ❌ BONUS ALREADY AWARDED: #" + lastCalledNumber + " bonus already triggered");
+        closeBonusPopup();
+        return false;
+    }
+    
+    // ALL 5 CONDITIONS MET!
+    console.log("[v0] 🎉 ALL 5 CONDITIONS MET FOR BONUS #" + lastCalledNumber + "!");
+    console.log("[v0] 🎁 BONUS AWARDED: #" + lastCalledNumber + " - $" + bonusInfo.amount.toFixed(2));
+    
+    lastBonusAwarded = lastCalledNumber; // Mark as awarded
+    showBonusPopup(bonusInfo);
+    
+    return true;
+}
+
+function doesNumberExistOnCard(number) {
+    const cardIdInput = document.getElementById('cardIdInput');
+    const cardId = parseInt(cardIdInput.value, 10);
+    
+    if (isNaN(cardId) || cardId < 1 || cardId > bingoCards.length) {
+        console.error("[v0] Invalid card ID: " + cardIdInput.value);
+        return false;
+    }
+    
+    const card = bingoCards[cardId - 1];
+    if (!card) {
+        console.error("[v0] Card not found for ID: " + cardId);
+        return false;
+    }
+    
+    // Check if number exists in card
+    for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+            if (card[i][j] === number) {
+                console.log("[v0] Number #" + number + " found at card position [" + i + "][" + j + "]");
+                return true;
+            }
+        }
+    }
+    
+    console.log("[v0] Number #" + number + " NOT found on card " + cardId);
+    return false;
+}
+
+function isBonusInWinningPattern(bonusNumber, pattern) {
+    // Get the bingo card and check if bonus number is in the winning pattern
+    const cardIdInput = document.getElementById('cardIdInput');
+    const cardId = parseInt(cardIdInput.value, 10);
+    
+    // Ensure cardId is valid before proceeding
+    if (isNaN(cardId) || cardId < 1 || cardId > bingoCards.length) {
+        console.error(`[v0] Invalid card ID encountered: ${cardIdInput.value}. Cannot check bonus pattern.`);
+        return false; 
+    }
+    
+    const card = bingoCards[cardId - 1];
+    if (!card) {
+        console.error(`[v0] Card not found for ID: ${cardId}`);
+        return false; 
+    }
+    
+    // Check if bonus exists in the card
+    let bonusRowCol = null;
+    for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+            if (card[i][j] === bonusNumber) {
+                bonusRowCol = { row: i, col: j };
+                break;
+            }
+        }
+        if (bonusRowCol) break;
+    }
+    
+    if (!bonusRowCol) {
+        console.log(`[v0] Bonus number #${bonusNumber} not found on card ${cardId}.`);
+        return false; // Bonus not on this card
+    }
+    
+    // Check if bonus is in the winning pattern
+    const row = bonusRowCol.row;
+    const col = bonusRowCol.col;
+    
+    switch(pattern.pattern) {
+        case 'row':
+            return pattern.index === row;
+        case 'column':
+            return pattern.index === col;
+        case 'diagonal1':
+            return row === col;
+        case 'diagonal2':
+            return row + col === 4;
+        case 'corners':
+            return (row === 0 || row === 4) && (col === 0 || col === 4);
+        default:
+            return false;
+    }
+}
+
+function isBonusNumberBlinking(bonusNumber) {
+    const cells = document.querySelectorAll('.bingo-grid div');
+    let isMarked = false;
+    
+    cells.forEach(cell => {
+        if (cell.innerText == bonusNumber && cell.classList.contains('marked')) {
+            isMarked = true;
+            console.log("[v0] ✅ Bonus number #" + bonusNumber + " IS marked/blinking on main grid");
+        }
+    });
+    
+    if (!isMarked) {
+        console.log("[v0] ❌ Bonus number #" + bonusNumber + " is NOT marked on main grid");
+    }
+    
+    return isMarked;
+}
+
+function monitorBonusState() {
+    setInterval(() => {
+        let anyBonusStillMarked = false;
+        
+        for (let bonus of bonuses) {
+            if (isBonusNumberBlinking(bonus.number)) {
+                anyBonusStillMarked = true;
+                break;
+            }
+        }
+        
+        if (!anyBonusStillMarked) {
+            const popup = document.getElementById('bonusPopup');
+            if (popup.classList.contains('show')) {
+                console.log("[v0] ⚠️ Bonus numbers no longer marked - clearing bonus popup");
+                closeBonusPopup();
+            }
+        }
+    }, 500);
+}
+
+// Event listeners
+document.getElementById('fetchButton').addEventListener('dblclick', async () => {
+    const cardId = parseInt(document.getElementById('cardIdInput').value, 10);
+    if (cardId > 0 && cardId <= bingoCards.length) {
+        await displayBingoCard(bingoCards[cardId - 1]);
+    } else {
+        alert('Please enter a valid Card ID (1-2000).');
+    }
+});
+
+document.querySelector('.close').addEventListener('click', closeModal);
+
+window.onclick = function(event) {
+    const modal = document.getElementById('bingoCardModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+document.getElementById('fetchButton').addEventListener('click', function() {
+    const cardId = document.getElementById('cardIdInput').value;
+    fetch('/fetch_card', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cardId: cardId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = data.message;
+        messageDiv.style.color = data.success ? 'green' : 'red';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+console.log("kaleab");
+
+document.getElementById('blockButton').addEventListener('click', function() {
+    const cardId = document.getElementById('cardIdInput').value;
+    if (cardId) {
+        fetch('/block_card', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: cardId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Card blocked successfully!');
+                console.log("kaleabb");
+            } else {
+                alert('Failed to block card. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert('Please enter a valid Card ID.');
+    }
+});
+
+document.getElementById('fetchButton').addEventListener('click', function() {
+    fetch('/fetch_bingo_card', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('messagea').innerText = data.message;
+    })
+    .catch(error => {
+        document.getElementById('messagea').innerText = 'Error: ' + error.message;
+    });
+});
+
+document.getElementById('blockButton').addEventListener('click', function() {
+    const audio = document.getElementById('audio');
+    audio.play();
+    console.log("kaleabb");
+});
+</script>
+</body>
+</html>

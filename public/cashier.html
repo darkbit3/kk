@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arada Bingo - Cashier</title>
+    <style>
+        .container {
+            margin: 30px 0;
+        }
+
+        .button-1-100 {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            gap: 0px;
+            margin: 200px 0;
+            max-width: 200px;
+            justify-content: start;
+        }
+
+        .number-button {
+            padding: 6px 8px;
+            font-size: 12px;
+            border: 1px solid #007BFF;
+            border-radius: 4px;
+            background-color: black;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .number-button:hover {
+            background-color: #007BFF;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .selected {
+            background-color: white; /* Change selected button background to white */
+            color: black; /* Change text color for better visibility */
+            border-color: #0056b3;
+        }
+
+        /* Style for the start game button */
+        .start-game-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px; /* Add margin for spacing */
+            position: fixed; /* Make it fixed */
+            bottom: 80px; /* Distance from the bottom */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Adjust for exact centering */
+        }
+
+        .start-game-button:hover {
+            background-color: #218838;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: brown;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info span {
+            margin-left: 20px;
+        }
+
+        nav {
+            margin-left: auto;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 100%;
+            background-color: #f0f0f0; /* Optional: Background for button area */
+            padding: 5px 8px;
+            margin: 0;
+            height: 42px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .color-button {
+            flex: 1 1 0;
+            padding: 6px 14px;
+            font-size: 14px;
+            height: 32px;
+            line-height: 32px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            min-width: 90px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .black { background-color: black; }
+        .blue { background-color: blue; }
+        .green { background-color: green; }
+        .yellow { background-color: yellow; color: black; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: 10px;
+            padding: 8px;
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            min-height: 170px;
+        }
+
+        .box {
+            flex: 1 1 calc((100% - 50px) / 6);
+            max-width: calc((100% - 50px) / 6);
+            min-width: 140px;
+            height: 150px;
+            padding: 8px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+
+        .box h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .box .value {
+            font-size: 28px;
+            color: hsl(0, 0%, 0%);
+            margin-top: 4px;
+        }
+
+        #displayArea {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .box h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .box .value {
+            font-size: 40px;
+            color: hsl(0, 0%, 0%);
+        }
+
+        .warning {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .warning .value {
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .value-input {
+            width: 100px;  /* Increase the width */
+            padding: 10px;  /* Add more padding for larger input size */
+            font-size: 28px;  /* Increase the font size */
+            text-align: center;  /* Keep the value centered */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px; /* Space between buttons */
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s; /* Animation for scaling */
+        }
+
+        button.selected {
+            transform: scale(1.2); /* Increase size of selected button */
+            background-color: #ffffff; /* Change background color */
+            color: black; /* Change text color */
+        }
+
+        #displayArea {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+
+        .button-1-2000 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+            gap: 4px;
+            margin: 180px 0 20px 0;
+            width: 100%;
+            max-width: 100%;
+            min-height: 0;
+            height: auto;
+            overflow-y: auto;
+            padding: 7px;
+            box-sizing: border-box;
+        }
+
+        .scrollable-button {
+            padding: 4px 6px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .scrollable-button:hover {
+            background-color: #45a049;
+        }
+
+        .button {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .highlighted {
+            color: white;
+        }
+
+        .selected {
+            background-color: #FFD700; /* Gold color for selected buttons */
+            color: white;
+        }
+
+        button.selected {
+            transform: scale(1.2); /* Increase size of selected button */
+            background-color: #ffffff; /* Change background color for selected buttons */
+            color: black; /* Change text color for selected buttons */
+        }
+
+        button.highlighted {
+            transform: scale(1.2); /* Increase size of selected button */
+            background-color: black;
+            color: white;
+        }
+
+        button.selected {
+            transform: scale(1.2); /* Increase size of selected button */
+            background-color: brown; /* Change background color for selected buttons */
+            color: black; /* Change text color for selected buttons */
+        }
+
+        #userCounter {
+            font-size: 3em; /* Adjust the size as needed */
+            font-weight: bold; /* Optional: make the text bold */
+            color: #007BFF; /* Optional: change the text color */
+            transition: font-size 0.3s ease; /* Optional: smooth transition when size changes */
+        }
+
+        .common-button {
+            padding: 12px 20px; /* Shared padding */
+            font-size: 20px; /* Shared font size */
+            border: 2px solid #007BFF; /* Shared border */
+            border-radius: 5px; /* Shared border radius */
+            background-color: gold; /* Shared background color */
+            color: white; /* Shared text color */
+            font-weight: bold; /* Shared font weight */
+            transition: background-color 0.3s; /* Shared transition */
+        }
+
+        .common-button:hover {
+            background-color: #007BFF; /* Change background on hover */
+            color: white; /* Ensure text color remains white on hover */
+        }
+
+        #eyeIcon {
+            transition: transform 0.2s ease;
+        }
+
+        #eyeIcon:hover {
+            transform: scale(1.2);
+        }
+
+        /* Hidden box styles */
+        .hidden-box {
+            display: none;
+        }
+
+        #percentageToggle {
+            cursor: pointer;
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
+
+        /* Percentage control styles */
+        #percentageControl {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Arada bingo</h1>
+        <div id="percentageControl" style="display: flex;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="percentageInput" style="color: white; margin-right: 5px;">Percentage %:</label>
+                <button onclick="decreasePercentage()" style="padding: 5px 10px; background-color: #d9534f; color: white; border: none; border-radius: 3px; cursor: pointer;">−</button>
+                <input type="number" id="percentageInput" value="20" min="0" max="100" style="width: 60px; padding: 5px;">
+                <button onclick="increasePercentage()" style="padding: 5px 10px; background-color: #5cb85c; color: white; border: none; border-radius: 3px; cursor: pointer;">+</button>
+            </div>
+            <div style="color: white; font-size: 14px;">
+                <p>Payout: <span id="payoutPercentDisplay">80</span>%</p>
+                <p>Balance: <span id="balancePercentDisplay">20</span>%</p>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="userCounter" style="display:none;">0</span>
+            <span id="eyeIcon" style="cursor:pointer; font-size: 1.5em; margin-left:10px;">🙈</span>
+            <span id="percentageToggle" style="cursor:pointer; font-size: 1.5em; margin-left:10px;">😊</span>
+            <nav>
+                <a href="report.html">Report</a>
+                <a href="account.html">Account</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="button-container"> 
+        <button class="color-button black" onclick="changeColor('black')">Black</button>
+        <button class="color-button blue" onclick="changeColor('blue')">Blue</button>
+        <button class="color-button green" onclick="changeColor('green')">Green</button>
+        <button class="color-button yellow" onclick="changeColor('yellow')">Yellow</button>
+    </div>
+
+    <div class="container">
+        <div class="box">
+            <h2>Bet Amount</h2>
+            <div class="button-container">
+                <button onclick="selectAmountButton(10, this)" class="selected">10</button>
+                <button onclick="selectAmountButton(20, this)">20</button>
+                <button onclick="selectAmountButton(30, this)">30</button>
+                <button onclick="selectAmountButton(50, this)">50</button>
+                <button onclick="selectAmountButton(100, this)">100</button>
+            </div>
+            <div id="displayArea">Selected: 10</div>
+        </div>
+        <div class="box">
+            <h2>Game Number</h2>
+            <div id="game-id">{{ game_id }}</div>
+        </div>
+        <div class="box warning">
+            <h2>Wallet Status</h2>
+            <div class="value">Warning</div>
+        </div>
+        <div class="box hidden-box">
+            <h2>Cards Selected</h2>
+            <div id="cardsSelectedDisplay">0</div>
+        </div>
+        <div class="box hidden-box">
+            <h2>Calculation</h2>
+            <div style="font-size: 14px; text-align: left;">
+                <p>Amount: <span id="calcAmount">0</span></p>
+                <p>Cards: <span id="calcCards">0</span></p>
+                <p>Total: <span id="calcTotal">0</span></p>
+            </div>
+        </div>
+        <div class="box hidden-box">
+            <h2 id="payoutLabel">Payout (80%)</h2>
+            <div class="value" id="payoutDisplay">0.00</div>
+        </div>
+        <div class="box hidden-box">
+            <h2 id="balanceLabel">Balance (20%)</h2>
+            <div class="value" id="balanceDisplay">0.00</div>
+        </div>
+    </div>
+
+    <div class="button-1-2000" id="ButtonsnumberContainer"></div>
+
+    <div class="button-container">
+        <button class="common-button" id="startGameButton" onclick="startGame()">Start Game</button>
+        <button class="common-button" id="kaleab">Select</button>
+        <button class="common-button" id="kale">Clear</button>
+        <button id="selectAllButton">Select All</button>
+    </div>
+
+    <script>
+        // Global Variables
+        let lastSelectedValue = 10;
+        let selectedCount = 0;
+        let selectedButtons = [];
+        let currentPercentage = 20;
+        let lastSelectedAmountButton = null; // Track the last selected amount button to deselect it
+
+        // Event Listeners
+        window.onload = function() {
+            createButtons1To400();
+            const initialButton = document.querySelector('button.selected');
+            if (initialButton) {
+                selectButton(10, initialButton);
+            }
+            document.getElementById('percentageInput').addEventListener('change', function() {
+                currentPercentage = parseInt(this.value);
+                updatePercentageDisplay();
+                updateCalculationDisplay();
+            });
+            document.getElementById('percentageInput').addEventListener('input', function() {
+                currentPercentage = parseInt(this.value);
+                updatePercentageDisplay();
+                updateCalculationDisplay();
+            });
+            updateCalculationDisplay();
+            
+            // Initialize percentage toggle
+            const percentageToggle = document.getElementById('percentageToggle');
+            let percentageVisible = false;
+
+            percentageToggle.addEventListener('click', () => {
+                percentageVisible = !percentageVisible;
+                const percentageControl = document.getElementById('percentageControl');
+                
+                if (percentageVisible) {
+                    percentageControl.style.display = 'flex';
+                    percentageToggle.textContent = '😞';
+                } else {
+                    percentageControl.style.display = 'none';
+                    percentageToggle.textContent = '😊';
+                }
+            });
+        };
+
+        // Function to generate buttons 1 to 400
+        function createButtons1To400() {
+            const container = document.getElementById('ButtonsnumberContainer');
+            for (let i = 1; i <= 400; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.className = 'number-button';
+                button.id = `button-${i}`;
+                button.onclick = () => handleButtonClick(i, button);
+                container.appendChild(button);
+            }
+        }
+
+        // Functions for Button Selection
+        function selectAmountButton(value, button) {
+            // Remove 'selected' class from previous amount button
+            if (lastSelectedAmountButton && lastSelectedAmountButton !== button) {
+                lastSelectedAmountButton.classList.remove('selected');
+            }
+            // Add 'selected' class to current button
+            button.classList.add('selected');
+            lastSelectedAmountButton = button;
+            
+            lastSelectedValue = value;
+            updateDisplayArea();
+            updateCalculationDisplay();
+        }
+
+        function selectButton(value, button) {
+            button.classList.add('selected');
+            if ([10, 20, 30, 50, 100].includes(value)) {
+                lastSelectedValue = value;
+            }
+            updateDisplayArea();
+            updateCalculationDisplay();
+        }
+
+        function deselectButton(button) {
+            button.classList.remove('selected');
+        }
+
+        function updateDisplayArea() {
+            document.getElementById('displayArea').innerText = 'Selected: ' + lastSelectedValue;
+        }
+
+        function updatePercentageDisplay() {
+            const payoutPercent = 100 - currentPercentage;
+            document.getElementById('payoutPercentDisplay').innerText = payoutPercent;
+            document.getElementById('balancePercentDisplay').innerText = currentPercentage;
+            document.getElementById('payoutLabel').innerText = `Payout (${payoutPercent}%)`;
+            document.getElementById('balanceLabel').innerText = `Balance (${currentPercentage}%)`;
+        }
+
+        function updateCalculationDisplay() {
+            const amount = lastSelectedValue;
+            const cards = selectedCount;
+            const total = amount * cards;
+            const payoutPercent = (100 - currentPercentage) / 100;
+            const balancePercent = currentPercentage / 100;
+            const payout = (total * payoutPercent).toFixed(2);
+            const balance = (total * balancePercent).toFixed(2);
+
+            document.getElementById('calcAmount').innerText = amount;
+            document.getElementById('calcCards').innerText = cards;
+            document.getElementById('calcTotal').innerText = total;
+            document.getElementById('cardsSelectedDisplay').innerText = cards;
+            document.getElementById('payoutDisplay').innerText = payout;
+            document.getElementById('balanceDisplay').innerText = balance;
+        }
+
+        // Handle Button Click (Select/Deselect)
+        function handleButtonClick(value, button) {
+            if (button.classList.contains('selected')) {
+                deselectButton(button);
+                selectedCount--;
+                selectedButtons = selectedButtons.filter(num => num !== value);
+            } else {
+                selectButton(value, button);
+                selectedCount++;
+                selectedButtons.push(value);
+            }
+            updateUserCounter();
+            updateCalculationDisplay();
+        }
+
+        function updateUserCounter() {
+            document.getElementById('userCounter').innerText = 'Selected Count: ' + selectedCount;
+        }
+
+        // Event Listener for the "Select" button
+        document.getElementById("kaleab").addEventListener("click", function() {
+            fetch('/kaleab_get')
+                .then(response => response.json())
+                .then(data => {
+                    markNumbers(data.numbers);
+                });
+        });
+
+        // Function to mark numbers fetched from backend and auto-select them
+        function markNumbers(numbers) {
+            numbers.forEach(number => {
+                const button = document.getElementById(`button-${number}`);
+                if (button) {
+                    button.classList.add('highlighted');
+                    button.classList.add('selected');
+                    if (!selectedButtons.includes(number)) {
+                        selectedButtons.push(number);
+                        selectedCount++;
+                    }
+                }
+            });
+            updateUserCounter();
+            updateCalculationDisplay();
+        }
+
+        // Game Functions
+        async function startGame() {
+            fetch('/reset_file', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('File reset successfully!');
+                } else {
+                    console.error('Error resetting the file');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+            const amount = lastSelectedValue;
+            const total = selectedCount;
+
+            console.log('Starting game with Amount:', amount, 'Total:', total);
+
+            if (total === 0) {
+                console.warn('Total is zero, no selections made.');
+                return;
+            }
+
+            const balance = calculateBalance(amount, total, currentPercentage);
+            const payout = calculatePayout(amount, total, currentPercentage);
+
+            console.log('Payout:', payout);
+
+            const randomNumbers = generateRandomNumbers(75);
+            
+            const data = {
+                amount: amount,
+                total: total,
+                balance: balance,
+                payout: payout,
+                cards: selectedButtons,
+                randomNumbers: randomNumbers,
+                percentage: currentPercentage
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/start-game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Game started successfully:', result);
+                    window.location.href = 'display.html';
+                } else {
+                    console.error('Error starting the game:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        function calculatePayout(amount, total, percentage) {
+            const payoutPercent = (100 - percentage) / 100;
+            const payout = amount * total * payoutPercent;
+            console.log("[v0] Payout calculation: amount=" + amount + ", total=" + total + ", percentage=" + percentage + ", payout=" + payout);
+            return payout.toFixed(2);
+        }
+
+        function calculateBalance(amount, total, percentage) {
+            const balancePercent = percentage / 100;
+            const balance = amount * total * balancePercent;
+            console.log("[v0] Balance calculation: amount=" + amount + ", total=" + total + ", percentage=" + percentage + ", balance=" + balance);
+            return balance.toFixed(2);
+        }
+
+        function generateRandomNumbers(count) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                numbers.add(Math.floor(Math.random() * 75) + 1);
+            }
+            return Array.from(numbers);
+        }
+
+        function selectAllButtons() {
+            const buttons = document.querySelectorAll('.number-button');
+            buttons.forEach(button => {
+                button.classList.add('selected');
+                selectedButtons.push(parseInt(button.innerText));
+            });
+            selectedCount = buttons.length;
+            updateUserCounter();
+            updateCalculationDisplay();
+        }
+
+        document.getElementById('selectAllButton').onclick = selectAllButtons;
+
+        const eyeIcon = document.getElementById('eyeIcon');
+        const userCounter = document.getElementById('userCounter');
+        let visible = false;
+
+        eyeIcon.addEventListener('click', () => {
+            userCounter.style.display = 'inline';
+            eyeIcon.textContent = '👁️';
+            visible = true;
+        });
+
+        eyeIcon.addEventListener('dblclick', () => {
+            userCounter.style.display = 'none';
+            eyeIcon.textContent = '🙈';
+            visible = false;
+        });
+
+        // Functions for percentage increment/decrement by 5%
+        function increasePercentage() {
+            const input = document.getElementById('percentageInput');
+            let value = parseInt(input.value) + 5;
+            if (value > 100) value = 100;
+            input.value = value;
+            currentPercentage = value;
+            updatePercentageDisplay();
+            updateCalculationDisplay();
+        }
+
+        function decreasePercentage() {
+            const input = document.getElementById('percentageInput');
+            let value = parseInt(input.value) - 5;
+            if (value < 0) value = 0;
+            input.value = value;
+            currentPercentage = value;
+            updatePercentageDisplay();
+            updateCalculationDisplay();
+        }
+        
+        // Placeholder function for color change
+        function changeColor(color) {
+            // Implementation for color change functionality
+            console.log('Color changed to:', color);
+        }
+    </script>
+</body>
+</html>
